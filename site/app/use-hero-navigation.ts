@@ -68,6 +68,7 @@ export function useHeroNavigation(paused: boolean) {
     const morphY = Math.max(fromY, heroTop + travel * .97);
     const remaining = clamp((morphY - fromY) / (travel * .97));
     const morphDuration = remaining > .01 ? Math.max(650, 1500 * remaining) : 0;
+    const holdDuration = 500;
     const revealDuration = 480;
     let elapsed = 0, last = 0;
     const frame = (now: number) => {
@@ -77,8 +78,10 @@ export function useHeroNavigation(paused: boolean) {
       last = now;
       if (elapsed < morphDuration) {
         window.scrollTo({ top: fromY + (morphY - fromY) * ease(clamp(elapsed / morphDuration)), behavior: 'instant' });
+      } else if (elapsed < morphDuration + holdDuration) {
+        window.scrollTo({ top: morphY, behavior: 'instant' });
       } else {
-        const progress = clamp((elapsed - morphDuration) / revealDuration);
+        const progress = clamp((elapsed - morphDuration - holdDuration) / revealDuration);
         const reveal = 1 - Math.pow(1 - progress, 3);
         window.scrollTo({ top: morphY + (destinationY() - morphY) * reveal, behavior: 'instant' });
         if (progress === 1) { finish(); return; }
